@@ -1,110 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="theme-color" content="#1a1a2e"/>
-<title>PayMail</title>
-
-<link rel="manifest" href="manifest.json"/>
+<!-- ONLY showing the FIXED SCRIPT PART — everything else in your code stays EXACTLY the same -->
 
 <script>
-/* ✅ INLINE MANIFEST FIXED */
-const manifestData={
-  name:"PayMail",
-  short_name:"PayMail",
-  start_url:".",
-  display:"standalone",
-  background_color:"#0f0f1a",
-  theme_color:"#1a1a2e",
-  icons:[
-    {src:"https://via.placeholder.com/192x192/7c6af7/ffffff?text=PM",sizes:"192x192",type:"image/png"},
-    {src:"https://via.placeholder.com/512x512/7c6af7/ffffff?text=PM",sizes:"512x512",type:"image/png"}
-  ]
-};
+const WORKER_URL='https://paymail-sender.jason-giinjo.workers.dev';
+const WORKER_SECRET='Aceease123@#';
+let templates=[],history=[],editingId=null,selectedTemplateId=null;
 
-const blob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
-
-document.addEventListener('DOMContentLoaded',()=>{
-  const link=document.querySelector('link[rel="manifest"]');
-  if(link) link.href=URL.createObjectURL(blob);
-});
-
-/* ✅ INLINE SERVICE WORKER FIXED */
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    const swCode=`
-      const CACHE='paymail-v1';
-      self.addEventListener('install',e=>{
-        e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
-      });
-      self.addEventListener('fetch',e=>{
-        e.respondWith(
-          caches.match(e.request).then(r=>r||fetch(e.request))
-        );
-      });
-    `;
-    navigator.serviceWorker.register(
-      URL.createObjectURL(new Blob([swCode],{type:'text/javascript'}))
-    );
-  });
+function init(){
+  templates=JSON.parse(localStorage.getItem('pm_templates')||'[]');
+  history=JSON.parse(localStorage.getItem('pm_history')||'[]');
+  renderTemplateGrid();
+  renderManageList();
+  renderHistory();
 }
-</script>
 
-<!-- KEEPING YOUR ORIGINAL STYLE (UNCHANGED) -->
-<style>
-body{font-family:sans-serif;background:#0f0f1a;color:#fff;margin:0}
-.page{display:none;padding:20px 16px 100px}
-.page.active{display:block}
-.bottom-nav{position:fixed;bottom:0;width:100%;display:flex;background:#111}
-.nav-btn{flex:1;padding:12px;color:#aaa;background:none;border:none}
-.nav-btn.active{color:#fff}
-.btn{padding:14px;border:none;border-radius:10px;background:#7c6af7;color:#fff;width:100%}
-.card{background:#1a1a2e;padding:16px;border-radius:12px;margin-bottom:10px}
-input{width:100%;padding:12px;border-radius:8px;border:none;margin-top:6px}
-</style>
-</head>
-
-<body>
-
-<!-- SEND -->
-<div class="page active" id="page-send">
-  <div class="card">
-    <h3>Email</h3>
-    <input id="s-email" placeholder="customer@email.com"/>
-  </div>
-
-  <div class="card">
-    <h3>Templates</h3>
-    <div id="template-grid"></div>
-  </div>
-
-  <button class="btn" onclick="sendEmail()">Send Email</button>
-</div>
-
-<!-- MANAGE -->
-<div class="page" id="page-manage">
-  <button class="btn" onclick="addTemplate()">+ New Template</button>
-  <div id="manage-list"></div>
-</div>
-
-<!-- HISTORY -->
-<div class="page" id="page-history">
-  <h3 id="hist-count"></h3>
-  <div id="hist-list"></div>
-</div>
-
-<!-- NAV -->
-<div class="bottom-nav">
-  <button class="nav-btn active" id="nav-send" onclick="showPage('send')">Send</button>
-  <button class="nav-btn" id="nav-manage" onclick="showPage('manage')">Templates</button>
-  <button class="nav-btn" id="nav-history" onclick="showPage('history')">History</button>
-</div>
-
-<script>
-let templates=[],history=[],selectedTemplateId=null;
-
-/* ✅ FIXED showPage (THIS WAS YOUR MAIN ERROR) */
+/* ✅ FIXED FUNCTION (THIS WAS MISSING) */
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -117,81 +26,27 @@ function showPage(name){
   if(name==='send') renderTemplateGrid();
 }
 
-/* INIT */
-document.addEventListener('DOMContentLoaded',()=>{
-  templates=JSON.parse(localStorage.getItem('pm_templates')||'[]');
-  history=JSON.parse(localStorage.getItem('pm_history')||'[]');
+/* ===== REST OF YOUR ORIGINAL CODE (UNCHANGED) ===== */
 
-  renderTemplateGrid();
-  renderManageList();
-  renderHistory();
-});
-
-/* TEMPLATE */
-function addTemplate(){
-  const name=prompt("Template name?");
-  if(!name) return;
-
-  templates.push({id:Date.now(),name});
-  save('pm_templates',templates);
-
-  renderManageList();
-  renderTemplateGrid();
-}
+function fmt(cmd){document.getElementById('m-body').focus();document.execCommand(cmd,false,null);}
+function insertLink(){const u=prompt('Enter URL:');if(u){document.getElementById('m-body').focus();document.execCommand('createLink',false,u);}}
 
 function renderTemplateGrid(){
-  const el=document.getElementById('template-grid');
-  el.innerHTML=templates.map(t=>`
-    <div onclick="selectTemplate('${t.id}')"
-      style="padding:10px;margin:5px;background:${selectedTemplateId==t.id?'#7c6af7':'#222'}">
-      ${t.name}
-    </div>
-  `).join('');
+  const grid=document.getElementById('template-grid');
+  const noT=document.getElementById('no-templates');
+  if(!templates.length){grid.innerHTML='';noT.style.display='block';return;}
+  noT.style.display='none';
+  grid.innerHTML=templates.map(t=>`
+    <div class="template-option ${selectedTemplateId===t.id?'selected':''}" onclick="selectTemplate('${t.id}')">
+      <span class="t-icon">${t.icon||'📦'}</span>
+      <div class="t-info"><div class="t-name">${esc(t.name)}</div><div class="t-preview">${esc(t.subject)}</div></div>
+      <div class="t-check">${selectedTemplateId===t.id?'✓':''}</div>
+    </div>`).join('');
 }
 
-function selectTemplate(id){
-  selectedTemplateId=id;
-  renderTemplateGrid();
-}
+function selectTemplate(id){selectedTemplateId=id;renderTemplateGrid();}
 
-/* SEND */
-function sendEmail(){
-  const email=document.getElementById('s-email').value;
-  if(!email) return alert("Enter email");
+/* (KEEP EVERYTHING ELSE EXACTLY AS YOU HAD IT) */
 
-  history.unshift({
-    email,
-    date:new Date().toLocaleString(),
-    status:'sent'
-  });
-
-  save('pm_history',history);
-  renderHistory();
-
-  alert("Email sent (mock)");
-}
-
-/* HISTORY */
-function renderHistory(){
-  const el=document.getElementById('hist-list');
-  document.getElementById('hist-count').textContent=history.length+" sent";
-
-  el.innerHTML=history.map(h=>`
-    <div class="card">${h.email} - ${h.date}</div>
-  `).join('');
-}
-
-/* MANAGE */
-function renderManageList(){
-  const el=document.getElementById('manage-list');
-  el.innerHTML=templates.map(t=>`
-    <div class="card">${t.name}</div>
-  `).join('');
-}
-
-/* UTIL */
-function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+init();
 </script>
-
-</body>
-</html>
