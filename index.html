@@ -182,7 +182,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
 </div>
 
 <script>
-const WORKER_URL='https://script.google.com/macros/s/AKfycbxZ_GIjapLXZtlTlmE7_5Oeal_fHrmktV6xyW-XAlxc8job7wMI7tEWi07u7PLDAaUG/exec';
+const WORKER_URL='https://paymail-sender.jason-giinjo.workers.dev';
 const WORKER_SECRET='Aceease123@#';
 let templates=[],history=[],editingId=null,selectedTemplateId=null;
 
@@ -246,16 +246,18 @@ async function sendEmail(){
     tmp.innerHTML = tmpl.body || '';
     const plainText = tmp.innerText || tmp.textContent || '';
 
+    const formData = new URLSearchParams();
+    formData.append('data', JSON.stringify({
+      to: email,
+      subject: tmpl.subject,
+      htmlBody: tmpl.body,
+      plainText: plainText,
+      secret: WORKER_SECRET
+    }));
+
     const res=await fetch(WORKER_URL,{
       method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({
-        to:email,
-        subject:tmpl.subject,
-        htmlBody:tmpl.body,
-        plainText:plainText,
-        secret:WORKER_SECRET
-      })
+      body: formData
     });
     const data=await res.json();
     if(data.success){
