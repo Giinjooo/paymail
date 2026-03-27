@@ -182,7 +182,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
 </div>
 
 <script>
-const WORKER_URL='https://paymail-sender.jason-giinjo.workers.dev';
+const WORKER_URL='https://script.google.com/macros/s/AKfycbwg1KBfyOueYcd4PU58B0OQ3jwU8LYK9yqJ0MdCLn0HTcOjkLXg_WeQ57kToYOZ3rKS/exec';
 const WORKER_SECRET='Aceease123@#';
 let templates=[],history=[],editingId=null,selectedTemplateId=null;
 
@@ -241,10 +241,21 @@ async function sendEmail(){
   btn.innerHTML='<span class="spinner"></span> Sending...';
   btn.disabled=true;
   try{
+    // Convert HTML to plain text for fallback
+    const tmp = document.createElement('div');
+    tmp.innerHTML = tmpl.body || '';
+    const plainText = tmp.innerText || tmp.textContent || '';
+
     const res=await fetch(WORKER_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({to:email,subject:tmpl.subject,body:tmpl.body,secret:WORKER_SECRET})
+      body:JSON.stringify({
+        to:email,
+        subject:tmpl.subject,
+        htmlBody:tmpl.body,
+        plainText:plainText,
+        secret:WORKER_SECRET
+      })
     });
     const data=await res.json();
     if(data.success){
