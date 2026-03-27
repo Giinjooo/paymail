@@ -11,120 +11,45 @@
 <title>PayMail</title>
 <link rel="manifest" href="manifest.json"/>
 <script>
-// Inline manifest injection for PWABuilder
-const manifestData = {
-  name: "PayMail",
-  short_name: "PayMail",
-  description: "Send payment confirmation emails after GCash payments",
-  start_url: "./",
-  display: "standalone",
-  background_color: "#0f0f1a",
-  theme_color: "#1a1a2e",
-  orientation: "portrait",
-  icons: [
-    { src: "https://via.placeholder.com/192x192/7c6af7/ffffff?text=PM", sizes: "192x192", type: "image/png" },
-    { src: "https://via.placeholder.com/512x512/7c6af7/ffffff?text=PM", sizes: "512x512", type: "image/png" }
-  ]
-};
-const blob = new Blob([JSON.stringify(manifestData)], {type:'application/json'});
-const manifestURL = URL.createObjectURL(blob);
-document.addEventListener('DOMContentLoaded', () => {
-  const el = document.querySelector('link[rel="manifest"]');
-  if(el) el.href = manifestURL;
-});
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const swContent = `
-      const CACHE='paymail-v1';
-      const ASSETS=['./'];
-      self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
-      self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
-    `;
-    const swBlob = new Blob([swContent], {type:'application/javascript'});
-    const swURL = URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swURL).catch(()=>{});
-  });
-}
+const manifestData={name:"PayMail",short_name:"PayMail",description:"GCash Email Automation",start_url:"./",display:"standalone",background_color:"#0f0f1a",theme_color:"#1a1a2e",orientation:"portrait",icons:[{src:"https://via.placeholder.com/192x192/7c6af7/ffffff?text=PM",sizes:"192x192",type:"image/png",purpose:"any maskable"},{src:"https://via.placeholder.com/512x512/7c6af7/ffffff?text=PM",sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+const blob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
+document.addEventListener('DOMContentLoaded',()=>{const el=document.querySelector('link[rel="manifest"]');if(el)el.href=URL.createObjectURL(blob);});
+if('serviceWorker'in navigator){window.addEventListener('load',()=>{const sw=`const C='pm-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});});}
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg: #0f0f1a;
-  --surface: #1a1a2e;
-  --surface2: #22223b;
-  --accent: #7c6af7;
-  --accent2: #a594f9;
-  --accent-glow: rgba(124,106,247,0.25);
-  --green: #4ade80;
-  --green-dim: rgba(74,222,128,0.12);
-  --red: #f87171;
-  --red-dim: rgba(248,113,113,0.12);
-  --yellow: #fbbf24;
-  --text: #f0efff;
-  --muted: #7c7a9e;
-  --border: rgba(255,255,255,0.07);
-  --radius: 16px;
-  --font: 'DM Sans', sans-serif;
-  --mono: 'DM Mono', monospace;
-}
+:root{--bg:#0f0f1a;--surface:#1a1a2e;--surface2:#22223b;--accent:#7c6af7;--accent2:#a594f9;--accent-glow:rgba(124,106,247,0.25);--green:#4ade80;--green-dim:rgba(74,222,128,0.12);--red:#f87171;--red-dim:rgba(248,113,113,0.12);--text:#f0efff;--muted:#7c7a9e;--border:rgba(255,255,255,0.07);--radius:16px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
-
-/* BG GLOW */
 body::before{content:'';position:fixed;top:-40%;left:-20%;width:70%;height:70%;background:radial-gradient(circle,rgba(124,106,247,0.12) 0%,transparent 70%);pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50%;background:radial-gradient(circle,rgba(74,222,128,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
-
-/* TOPBAR */
-.topbar{position:sticky;top:0;z-index:100;background:rgba(15,15,26,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-size:1.1rem;font-weight:700;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(15,15,26,0.9);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px;}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
-
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(15,15,26,0.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);}
+.logo-sub{font-size:0.62rem;color:var(--muted);font-family:var(--mono);}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(15,15,26,0.95);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 12px;border:none;background:transparent;font-family:var(--font);font-size:0.65rem;font-weight:600;color:var(--muted);cursor:pointer;letter-spacing:0.3px;text-transform:uppercase;transition:color 0.2s;}
 .nav-btn.active{color:var(--accent2);}
-.nav-icon{font-size:1.25rem;line-height:1;}
-
-/* PAGES */
+.nav-icon{font-size:1.25rem;}
 .page{display:none;padding:20px 16px 100px;position:relative;z-index:1;animation:fadeIn 0.25s ease;}
 .page.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
-/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px;margin-bottom:14px;}
 .card-title{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:16px;}
-
-/* FORM */
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:7px;}
-.field input,.field textarea,.field select{
-  width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:11px;
-  padding:12px 14px;font-family:var(--font);font-size:0.9rem;color:var(--text);outline:none;
-  transition:border-color 0.2s,box-shadow 0.2s;
-  -webkit-appearance:none;appearance:none;
-  -webkit-text-fill-color:var(--text);
-}
-.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
-.field textarea{resize:vertical;min-height:120px;line-height:1.6;}
-.field select option{background:var(--surface2);}
-
-/* TEMPLATE SELECTOR */
+.field input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:11px;padding:12px 14px;font-family:var(--font);font-size:0.9rem;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(--text);}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
 .template-grid{display:flex;flex-direction:column;gap:10px;}
-.template-option{
-  background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;
-  padding:14px 16px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px;
-}
+.template-option{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px;}
 .template-option:active{transform:scale(0.98);}
 .template-option.selected{border-color:var(--accent);background:rgba(124,106,247,0.1);box-shadow:0 0 0 3px var(--accent-glow);}
-.template-option .t-icon{font-size:1.4rem;flex-shrink:0;}
-.template-option .t-info{flex:1;min-width:0;}
-.template-option .t-name{font-weight:600;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.template-option .t-preview{font-size:0.72rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.template-option .t-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.template-option.selected .t-check{background:var(--accent);border-color:var(--accent);color:#fff;font-size:0.75rem;}
-
-/* BUTTONS */
+.t-icon{font-size:1.4rem;flex-shrink:0;}
+.t-info{flex:1;min-width:0;}
+.t-name{font-weight:600;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.t-preview{font-size:0.72rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.t-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:0.75rem;}
+.template-option.selected .t-check{background:var(--accent);border-color:var(--accent);color:#fff;}
 .btn{width:100%;border:none;border-radius:12px;padding:14px;font-family:var(--font);font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-primary{background:linear-gradient(135deg,var(--accent),#9b8cff);color:#fff;box-shadow:0 6px 24px var(--accent-glow);}
 .btn-primary:active{transform:scale(0.97);}
@@ -132,134 +57,86 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
 .btn-secondary{background:var(--surface2);color:var(--text);border:1.5px solid var(--border);}
 .btn-danger{background:var(--red-dim);color:var(--red);border:1.5px solid rgba(248,113,113,0.2);}
 .btn-sm{width:auto;padding:7px 14px;font-size:0.78rem;border-radius:8px;}
-
-/* TEMPLATE LIST (manage page) */
+.rte-toolbar{display:flex;flex-wrap:wrap;gap:5px;background:var(--surface2);border:1.5px solid var(--border);border-bottom:none;border-radius:11px 11px 0 0;padding:8px 10px;}
+.rte-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.78rem;padding:5px 10px;cursor:pointer;font-family:var(--font);transition:all 0.15s;}
+.rte-btn:active{background:var(--accent);color:#fff;}
+.rte-sep{width:1px;background:var(--border);margin:0 2px;align-self:stretch;}
+.rte-editor{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-top:none;border-radius:0 0 11px 11px;padding:12px 14px;font-family:var(--font);font-size:0.9rem;color:var(--text);outline:none;min-height:220px;max-height:55vh;overflow-y:auto;line-height:1.8;word-break:break-word;transition:border-color 0.2s;}
+.rte-editor:focus{border-color:var(--accent);}
+.rte-editor:empty:before{content:attr(placeholder);color:var(--muted);pointer-events:none;}
+.rte-editor a{color:var(--accent2);word-break:break-all;}
+.rte-editor ul,.rte-editor ol{padding-left:20px;}
 .tmpl-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
-.tmpl-item .ti-icon{font-size:1.5rem;flex-shrink:0;}
-.tmpl-item .ti-info{flex:1;min-width:0;}
-.tmpl-item .ti-name{font-weight:600;font-size:0.9rem;}
-.tmpl-item .ti-sub{font-size:0.72rem;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tmpl-item .ti-actions{display:flex;gap:6px;flex-shrink:0;}
+.ti-icon{font-size:1.5rem;flex-shrink:0;}
+.ti-info{flex:1;min-width:0;}
+.ti-name{font-weight:600;font-size:0.9rem;}
+.ti-sub{font-size:0.72rem;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ti-actions{display:flex;gap:6px;flex-shrink:0;}
 .icon-btn{width:34px;height:34px;border-radius:9px;border:none;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
 .icon-btn:active{transform:scale(0.92);}
 .icon-btn.edit{background:rgba(124,106,247,0.12);color:var(--accent2);}
 .icon-btn.del{background:var(--red-dim);color:var(--red);}
-
-/* HISTORY */
 .hist-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
-.hist-email{font-weight:600;font-size:0.88rem;margin-bottom:4px;}
+.hist-email{font-weight:600;font-size:0.88rem;margin-bottom:6px;}
 .hist-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .hist-template{font-size:0.72rem;color:var(--muted);}
 .hist-date{font-size:0.68rem;color:var(--muted);font-family:var(--mono);}
 .badge{font-size:0.68rem;font-weight:700;padding:3px 8px;border-radius:6px;}
 .badge.sent{background:var(--green-dim);color:var(--green);}
 .badge.failed{background:var(--red-dim);color:var(--red);}
-
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:200;align-items:flex-end;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:200;align-items:flex-end;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border-radius:22px 22px 0 0;padding:24px 18px 36px;width:100%;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease;}
+.modal{background:var(--surface);border-radius:22px 22px 0 0;padding:24px 18px 40px;width:100%;max-height:92vh;overflow-y:auto;animation:slideUp 0.3s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-title{font-size:1rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
 .modal-close{background:var(--surface2);border:none;color:var(--muted);font-size:1.1rem;width:32px;height:32px;border-radius:8px;cursor:pointer;}
 .modal-actions{display:flex;gap:10px;margin-top:16px;}
 .modal-actions .btn{flex:1;}
-
-/* TOAST */
 .toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 20px;border-radius:30px;font-size:0.82rem;font-weight:600;opacity:0;pointer-events:none;transition:all 0.3s;z-index:300;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.ok{border-color:rgba(74,222,128,0.4);color:var(--green);}
 .toast.err{border-color:rgba(248,113,113,0.4);color:var(--red);}
-
-/* EMPTY STATE */
 .empty{text-align:center;padding:48px 20px;color:var(--muted);}
 .empty .e-icon{font-size:2.8rem;margin-bottom:12px;}
 .empty p{font-size:0.85rem;line-height:1.6;}
-
-/* SETUP BANNER */
-.setup-banner{background:rgba(251,191,36,0.08);border:1.5px solid rgba(251,191,36,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:0.8rem;color:var(--yellow);line-height:1.7;}
-.setup-banner strong{display:block;margin-bottom:4px;}
-
-/* RICH TEXT EDITOR */
-.rte-toolbar{display:flex;flex-wrap:wrap;gap:5px;background:var(--surface2);border:1.5px solid var(--border);border-bottom:none;border-radius:11px 11px 0 0;padding:8px 10px;}
-.rte-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.78rem;padding:5px 10px;cursor:pointer;font-family:var(--font);transition:all 0.15s;}
-.rte-btn:active,.rte-btn:focus{background:var(--accent);color:#fff;outline:none;}
-.rte-sep{width:1px;background:var(--border);margin:0 2px;}
-.rte-editor{
-  width:100%;background:var(--surface2);border:1.5px solid var(--border);
-  border-top:none;border-radius:0 0 11px 11px;
-  padding:12px 14px;font-family:var(--font);font-size:0.9rem;color:var(--text);outline:none;
-  min-height:200px;max-height:60vh;overflow-y:auto;
-  line-height:1.7;word-break:break-word;
-  transition:border-color 0.2s;
-}
-.rte-editor:focus{border-color:var(--accent);}
-.rte-editor:empty:before{content:attr(placeholder);color:var(--muted);pointer-events:none;}
-.rte-editor a{color:var(--accent2);word-break:break-all;}
-.rte-editor ul,.rte-editor ol{padding-left:20px;}
-
-
-.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* STEP INDICATOR */
-.steps{display:flex;gap:6px;margin-bottom:18px;}
-.step{flex:1;height:3px;border-radius:2px;background:var(--surface2);}
-.step.done{background:var(--accent);}
-
-.divider{height:1px;background:var(--border);margin:16px 0;}
-.row{display:flex;gap:10px;}
-.row .btn{flex:1;}
 </style>
 </head>
 <body>
-
-<!-- TOPBAR -->
 <div class="topbar">
-  <div class="logo"><div class="logo-dot"></div> PayMail</div>
-  <span style="font-size:0.72rem;color:var(--muted);font-family:var(--mono);">v2.0</span>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <div><div>PayMail</div><div class="logo-sub">D' Bookshelf</div></div>
+  </div>
+  <span style="font-size:0.68rem;color:var(--muted);font-family:var(--mono);">v3.0</span>
 </div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- MODAL: Add / Edit Template -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-title">
       <span id="modal-title-text">New Template</span>
-      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <button class="modal-close" onclick="closeModalDirect()">x</button>
     </div>
+    <div class="field"><label>Template Name</label><input type="text" id="m-name" placeholder="e.g. Take All Templates"/></div>
+    <div class="field"><label>Icon (emoji)</label><input type="text" id="m-icon" placeholder="📦" maxlength="2"/></div>
+    <div class="field"><label>Email Subject</label><input type="text" id="m-subject" placeholder="e.g. Your Templates are Ready!"/></div>
     <div class="field">
-      <label>Template Name</label>
-      <input type="text" id="m-name" placeholder="e.g. Ebook Bundle – Premium"/>
-    </div>
-    <div class="field">
-      <label>Icon (emoji)</label>
-      <input type="text" id="m-icon" placeholder="📦" maxlength="2"/>
-    </div>
-    <div class="field">
-      <label>Email Subject</label>
-      <input type="text" id="m-subject" placeholder="e.g. Your Digital Product is Ready!"/>
-    </div>
-    <div class="field">
-      <label>Email Body (include your access links here)</label>
+      <label>Email Body</label>
       <div class="rte-toolbar">
-        <button type="button" class="rte-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
-        <button type="button" class="rte-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
-        <button type="button" class="rte-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+        <button type="button" class="rte-btn" onclick="fmt('bold')"><b>B</b></button>
+        <button type="button" class="rte-btn" onclick="fmt('italic')"><i>I</i></button>
+        <button type="button" class="rte-btn" onclick="fmt('underline')"><u>U</u></button>
         <span class="rte-sep"></span>
-        <button type="button" class="rte-btn" onclick="fmt('insertUnorderedList')" title="Bullet List">• List</button>
-        <button type="button" class="rte-btn" onclick="fmt('insertOrderedList')" title="Numbered List">1. List</button>
+        <button type="button" class="rte-btn" onclick="fmt('insertUnorderedList')">• List</button>
+        <button type="button" class="rte-btn" onclick="fmt('insertOrderedList')">1. List</button>
         <span class="rte-sep"></span>
-        <button type="button" class="rte-btn" onclick="insertLink()" title="Insert Link">🔗 Link</button>
-        <button type="button" class="rte-btn" onclick="fmt('removeFormat')" title="Clear Format">✕ Clear</button>
+        <button type="button" class="rte-btn" onclick="insertLink()">Link</button>
+        <button type="button" class="rte-btn" onclick="fmt('removeFormat')">Clear</button>
       </div>
-      <div id="m-body"
-        class="rte-editor"
-        contenteditable="true"
-        placeholder="Hi there!&#10;&#10;Thank you for your payment. Here is your access link:&#10;&#10;🔗 https://your-link-here.com&#10;&#10;— Your Shop Name"
-      ></div>
+      <div id="m-body" class="rte-editor" contenteditable="true" placeholder="Type your email body here..."></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModalDirect()">Cancel</button>
@@ -268,42 +145,27 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
   </div>
 </div>
 
-<!-- ===== SEND PAGE ===== -->
+<!-- SEND PAGE -->
 <div class="page active" id="page-send">
-
   <div class="card">
-    <div class="card-title">📧 Customer Email</div>
-    <div class="field" style="margin:0">
-      <input type="email" id="s-email" placeholder="customer@email.com" autocomplete="email"/>
-    </div>
+    <div class="card-title">Customer Email</div>
+    <div class="field" style="margin:0"><input type="email" id="s-email" placeholder="customer@email.com" autocomplete="email"/></div>
   </div>
-
   <div class="card">
-    <div class="card-title">📄 Choose Template</div>
-    <div class="template-grid" id="template-grid">
-      <!-- filled by JS -->
-    </div>
-    <div id="no-templates" class="empty" style="padding:24px 0 8px;display:none;">
-      <div class="e-icon">📭</div>
-      <p>No templates yet.<br>Go to <strong>Manage</strong> to add your first one.</p>
-    </div>
+    <div class="card-title">Choose Template</div>
+    <div class="template-grid" id="template-grid"></div>
+    <div id="no-templates" class="empty" style="padding:24px 0 8px;display:none;"><div class="e-icon">📭</div><p>No templates yet.<br>Go to <strong>Templates</strong> tab.</p></div>
   </div>
-
-  <button class="btn btn-primary" id="send-btn" onclick="sendEmail()">
-    <span>📨</span> Send Email
-  </button>
-
+  <button class="btn btn-primary" id="send-btn" onclick="sendEmail()"><span>📨</span> Send Email</button>
 </div>
 
-<!-- ===== MANAGE PAGE ===== -->
+<!-- MANAGE PAGE -->
 <div class="page" id="page-manage">
-  <button class="btn btn-primary" style="margin-bottom:14px;" onclick="openModal()">
-    <span>＋</span> New Template
-  </button>
+  <button class="btn btn-primary" style="margin-bottom:14px;" onclick="openModal()"><span>+</span> New Template</button>
   <div id="manage-list"></div>
 </div>
 
-<!-- ===== HISTORY PAGE ===== -->
+<!-- HISTORY PAGE -->
 <div class="page" id="page-history">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
     <span style="font-size:0.78rem;color:var(--muted);font-weight:600;" id="hist-count">0 sent</span>
@@ -312,330 +174,190 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
   <div id="hist-list"></div>
 </div>
 
-<!-- ===== SETTINGS PAGE ===== -->
-<div class="page" id="page-settings">
-  <div class="setup-banner">
-    <strong>⚙️ EmailJS Setup (free — 200 emails/month)</strong>
-    1. Sign up at <strong>emailjs.com</strong><br>
-    2. Add Gmail as your Email Service<br>
-    3. Create a template with variables: <code>{{to_email}}</code>, <code>{{subject}}</code>, <code>{{message}}</code><br>
-    4. Paste your Service ID, Template ID & Public Key below
-  </div>
-  <div class="card">
-    <div class="card-title">🔑 EmailJS Credentials</div>
-    <div class="field"><label>Service ID</label><input type="text" id="cfg-service" placeholder="service_xxxxxxx"/></div>
-    <div class="field"><label>Template ID</label><input type="text" id="cfg-template" placeholder="template_xxxxxxx"/></div>
-    <div class="field" style="margin:0"><label>Public Key</label><input type="text" id="cfg-pubkey" placeholder="xxxxxxxxxxxxxxxxxxxx"/></div>
-  </div>
-  <div class="card">
-    <div class="card-title">🏪 Sender Info</div>
-    <div class="field"><label>Sender Name</label><input type="text" id="cfg-sender" placeholder="e.g. My Digital Shop"/></div>
-    <div class="field" style="margin:0"><label>Reply-To Email (your Gmail)</label><input type="email" id="cfg-reply" placeholder="yourshop@gmail.com"/></div>
-  </div>
-  <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
-</div>
-
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <button class="nav-btn active" id="nav-send" onclick="showPage('send')">
-    <span class="nav-icon">📨</span>Send
-  </button>
-  <button class="nav-btn" id="nav-manage" onclick="showPage('manage')">
-    <span class="nav-icon">📄</span>Templates
-  </button>
-  <button class="nav-btn" id="nav-history" onclick="showPage('history')">
-    <span class="nav-icon">🕓</span>History
-  </button>
-  <button class="nav-btn" id="nav-settings" onclick="showPage('settings')">
-    <span class="nav-icon">⚙️</span>Settings
-  </button>
+  <button class="nav-btn active" id="nav-send" onclick="showPage('send')"><span class="nav-icon">📨</span>Send</button>
+  <button class="nav-btn" id="nav-manage" onclick="showPage('manage')"><span class="nav-icon">📄</span>Templates</button>
+  <button class="nav-btn" id="nav-history" onclick="showPage('history')"><span class="nav-icon">🕓</span>History</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-// ── STATE ──────────────────────────────────────────────
-let templates = [];
-let history   = [];
-let cfg       = {};
-let editingId = null;
-let selectedTemplateId = null;
+const WORKER_URL='https://paymail-sender.jason-giinjo.workers.dev';
+const WORKER_SECRET='Aceease123@#';
+let templates=[],history=[],editingId=null,selectedTemplateId=null;
 
-const ICONS = ['📦','📘','🎓','🎨','💡','🔗','🎬','🎵','📊','🖼️','🛠️','🌟'];
-
-// ── INIT ───────────────────────────────────────────────
-function init() {
-  templates = JSON.parse(localStorage.getItem('pm_templates') || '[]');
-  history   = JSON.parse(localStorage.getItem('pm_history')   || '[]');
-  cfg       = JSON.parse(localStorage.getItem('pm_cfg')       || '{}');
-
-  // Seed 8 placeholder templates if empty
-  if (!templates.length) {
-    const placeholders = [
-      { name: 'Digital Product 1', icon: '📦', subject: 'Your Digital Product 1 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 1:\n\n🔗 https://placeholder-link-1.com\n\nThis link is exclusively for you. Please do not share it.\n\nIf you have any questions, just reply to this email.\n\nThank you for your purchase!\n— My Digital Shop' },
-      { name: 'Digital Product 2', icon: '📘', subject: 'Your Digital Product 2 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 2:\n\n🔗 https://placeholder-link-2.com\n\nThis link is exclusively for you. Please do not share it.\n\nThank you for your purchase!\n— My Digital Shop' },
-      { name: 'Digital Product 3', icon: '🎓', subject: 'Your Digital Product 3 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 3:\n\n🔗 https://placeholder-link-3.com\n\nThis link is exclusively for you. Please do not share it.\n\nThank you for your purchase!\n— My Digital Shop' },
-      { name: 'Digital Product 4', icon: '🎨', subject: 'Your Digital Product 4 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 4:\n\n🔗 https://placeholder-link-4.com\n\nThis link is exclusively for you. Please do not share it.\n\nThank you for your purchase!\n— My Digital Shop' },
-      { name: 'Digital Product 5', icon: '💡', subject: 'Your Digital Product 5 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 5:\n\n🔗 https://placeholder-link-5.com\n\nThis link is exclusively for you. Please do not share it.\n\nThank you for your purchase!\n— My Digital Shop' },
-      { name: 'Digital Product 6', icon: '🎬', subject: 'Your Digital Product 6 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 6:\n\n🔗 https://placeholder-link-6.com\n\nThis link is exclusively for you. Please do not share it.\n\nThank you for your purchase!\n— My Digital Shop' },
-      { name: 'Digital Product 7', icon: '🎵', subject: 'Your Digital Product 7 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 7:\n\n🔗 https://placeholder-link-7.com\n\nThis link is exclusively for you. Please do not share it.\n\nThank you for your purchase!\n— My Digital Shop' },
-      { name: 'Digital Product 8', icon: '🌟', subject: 'Your Digital Product 8 is Ready!', body: 'Hi there!\n\nThank you for your payment! Here is your access link for Digital Product 8:\n\n🔗 https://placeholder-link-8.com\n\nThis link is exclusively for you. Please do not share it.\n\nThank you for your purchase!\n— My Digital Shop' },
-    ];
-    templates = placeholders.map((t, i) => ({ ...t, id: 'tmpl_' + i }));
-    save('pm_templates', templates);
-  }
-
-  loadCfgUI();
-  renderTemplateGrid();
-  renderManageList();
-  renderHistory();
-  if (cfg.pubkey) emailjs.init(cfg.pubkey);
+function init(){
+  templates=JSON.parse(localStorage.getItem('pm_templates')||'[]');
+  history=JSON.parse(localStorage.getItem('pm_history')||'[]');
+  if(!templates.length) seedTemplates();
+  renderTemplateGrid();renderManageList();renderHistory();
 }
 
-function fmt(cmd) {
-  document.getElementById('m-body').focus();
-  document.execCommand(cmd, false, null);
+function seedTemplates(){
+  templates=[
+    {id:'tmpl_1',name:'TAKE-ALL TEMPLATES',icon:'🗂️',subject:'TAKE-ALL TEMPLATES (NEW VERSION)',
+     body:'<p>(ALL templates inside)</p><p>BUNDLE 1: <a href="https://drive.google.com/file/d/11OvHtf7eILEtrCBmSZuvRdJ9ddgN4W2-/view?usp=sharing">Drive Link</a></p><br><p>Trophy: <a href="https://www.canva.com/design/DAGfbdI3NDk/ewRDTxKGb-BWFtDVI68fmQ/view?utm_content=DAGfbdI3NDk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>PRINTING BUSINESS: <a href="https://drive.google.com/drive/folders/1tie6c_8ZLiR4dlvv93lyC2qBCvka-mQL">Drive Link</a></p><p>RUSH ID: <a href="https://drive.google.com/file/d/1cQDCvTJE-jqODgO6f_w3QjPVJQ5L6kSO/view?usp=drivesdk">Drive Link</a></p><p>Rush Id (Canva): <a href="https://www.canva.com/design/DAGgRtd0jl0/s7TW6vqwclm2WyCszaLe0Q/view?utm_content=DAGgRtd0jl0&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>POCKET MIRROR: <a href="https://drive.google.com/file/d/1NXKeODmdPkccI1Lw6NhMY0sYpCA9Tr1K/view?usp=sharing">Drive Link</a></p><p>Pocket mirror 2: <a href="https://www.canva.com/design/DAG5ZizxyRs/xJwpn-BgeNVK3sBZBrnF4w/view?utm_content=DAG5ZizxyRs&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Tarpaulin bundle: <a href="https://www.canva.com/design/DAG5rq55Y2g/oBGmuDnTtKj3jPwAl-KMKw/view?utm_content=DAG5rq55Y2g&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>PHOTO AND GIFT BUNDLE: <a href="https://drive.google.com/file/d/1VnzcJQQglbQbbawyTbkTZL5J-fD4mbyq/view?usp=sharing">Drive Link</a></p><p>CHIBI SUBJECT STICKERS: <a href="https://www.canva.com/design/DAGfq07QAXM/EiiSfy8djgmtuyBrKp_8uw/view?utm_content=DAGfq07QAXM&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Flower Holder: <a href="https://www.canva.com/design/DAGdwiwh1hw/5YcWiZpaHsbcKbeSV8pzng/view?utm_content=DAGdwiwh1hw&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Flower Basket: <a href="https://www.canva.com/design/DAGfveDttoM/SB2sqCwjDXiOnTYA7uw2xA/view?utm_content=DAGfveDttoM&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Gift Bag: <a href="https://www.canva.com/design/DAGfvEhTuHs/Iy-qM2kBSQPKuv7lj-Jh0A/view?utm_content=DAGfvEhTuHs&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Gift Tags: <a href="https://www.canva.com/design/DAGdjHuEP20/FLY7qeyY1rprlUq2iX9nNw/view?utm_content=DAGdjHuEP20&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>School bundle: <a href="https://docs.google.com/document/d/1qQkE13vFI3fXVkVpJZVwr6QngAw8B9O-BimEtWwfbUA/edit?usp=sharing">Docs Link</a></p><p>CHIP BAGS: <a href="https://drive.google.com/drive/folders/15YpMtbyXWjRIcKetFQAUFtJVCRIs7jXk">Drive Link</a></p><p>2026 Calendar: <a href="https://docs.google.com/document/d/1UHFrP4GO5uwdXwsZdluxnoukccXXy1jQeOu-ySHqSiY/edit?usp=sharing">Docs Link</a></p><p>Drag and Drop Boxes: <a href="https://www.canva.com/design/DAGPsxlwXQ0/AhPF43SI4pPHMVqRDgx_tg/view?utm_content=DAGPsxlwXQ0&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Christmas Bundle: <a href="https://docs.google.com/document/d/1oEtToFxmlRmYHHJ2Yp1ty4bsgg1ECBaQk1TQg-IBG8g/edit?usp=sharing">Docs Link</a></p><p>Digital Products: <a href="https://docs.google.com/document/d/1jDLCJsGsME_90HYPhGOFWw80bYwJw0ueTffCuIAgVAM/edit?tab=t.0">Docs Link</a></p><p>Classroom Doorsign: <a href="https://www.canva.com/design/DAGrFJOPmB0/7ItqOFa-g2vZuiKj4I0-lw/view?utm_content=DAGrFJOPmB0&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Educational chart: <a href="https://www.canva.com/design/DAGtKi_QIpA/TWlXV8N0Ren5TEJfWs7zKQ/view?utm_content=DAGtKi_QIpA&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Teachers Bundle: <a href="https://docs.google.com/document/d/1YbnQ2q9Wfvgtm2Fx1LjrA0_wBCRUFa28Z_7eeBNsxoQ/edit?usp=sharing">Docs Link</a></p><p>Snack Trinkets: <a href="https://www.canva.com/design/DAGuRnsGar8/QDgv2Brx6SbqqePXW3UEnw/view?utm_content=DAGuRnsGar8&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>BLIND BOX: <a href="https://drive.google.com/drive/folders/15qaFNGJQnW1eo0YQsBUI2viT4UjE6R7o">Drive Link</a></p><p>BABY STUFF BUNDLE: <a href="https://drive.google.com/file/d/1NI0A6GfGDYeAWPkoeeklkK1yNCG82jFa/view">Drive Link</a></p><p>UNDAS BUNDLE: <a href="https://drive.google.com/drive/folders/1RO9loZxGQ6481f6Ab2FgQK4cpnnmOz3W">Drive Link</a></p><p>Plate Number: <a href="https://www.canva.com/design/DAGzAin4EGk/rOUnzVtZd1clvMwwTODQCw/view?utm_content=DAGzAin4EGk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p>'},
+    {id:'tmpl_2',name:'FREEBIES',icon:'🎁',subject:'FREEBIES (ALL TEMPLATES)',
+     body:'<p>FREEBIES:</p><p>Love Box: <a href="https://www.canva.com/design/DAGgv38hbWY/Wrk5n5dRHyMn_nHrWU_Xng/view?utm_content=DAGgv38hbWY&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p><a href="https://www.canva.com/design/DAGgv6BMxBk/VxA08R-BvI8gbwPOVVWbOQ/view?utm_content=DAGgv6BMxBk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Love Box 2</a></p><p>Heart bag: <a href="https://www.canva.com/design/DAGgv1dxcQo/TxczuKTs_qeduqlPzKeRqg/view?utm_content=DAGgv1dxcQo&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Heart box: <a href="https://www.canva.com/design/DAGgwGuou3A/hLRL4dH_mtcDipYt-JlB5A/view?utm_content=DAGgwGuou3A&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>FLOWER HOLDER (Mothers): <a href="https://www.canva.com/design/DAGgwBl7SEs/H_IL3OKVsk_m4zx26AcAQA/view?utm_content=DAGgwBl7SEs&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Mothers day money holder: <a href="https://www.canva.com/design/DAGk_2MausM/S2C8-K86ZaG9JiCE2EdnpA/view?utm_content=DAGk_2MausM&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Loot Bag: <a href="https://www.canva.com/design/DAGgv5xVi1g/EtPZVeqqh0M1AssCEoi8Fw/view?utm_content=DAGgv5xVi1g&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Lootbag1: <a href="https://www.canva.com/design/DAGgwK1FO80/Tcv1VmXEpg_wEdZznOKLsQ/view?utm_content=DAGgwK1FO80&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Lootbag2: <a href="https://www.canva.com/design/DAGgwLgSCXQ/R38nErr4iacIoU8w1wBw0w/view?utm_content=DAGgwLgSCXQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Chipbags (Mothers): <a href="https://www.canva.com/design/DAGgwEwWdIo/a83z1lzto28DYSNE_fT2uA/view?utm_content=DAGgwEwWdIo&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Subject Label: <a href="https://drive.google.com/drive/folders/17KE_ExwsuiYnrjjT_FyYPNvSx7P9WTFt?usp=drive_link">Drive Link</a></p><p>Multiplication (BINI and San Rio): <a href="https://www.canva.com/design/DAGgv2QKNxk/UmbxYxNkGYXcGNsuwnLL7A/view?utm_content=DAGgv2QKNxk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Graduation Garland: <a href="https://www.canva.com/design/DAGgvxPBQHc/uEWone35wnDoT98w5HGA3w/view?utm_content=DAGgvxPBQHc&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Graduation centerpiece: <a href="https://drive.google.com/drive/folders/13Hb28XuqOSXRBBNbrAoQ6vHo_xhO8tOP?usp=sharing">Drive Link</a></p><p>Pinbadge (Women): <a href="https://www.canva.com/design/DAGgwHTM4Qo/kWES2s1U7l8lwo8NKH8LxQ/view?utm_content=DAGgwHTM4Qo&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Pinbadge1: <a href="https://www.canva.com/design/DAGgwMELzhs/7v7WZjD9_qMEDSEMR0zJ9g/view?utm_content=DAGgwMELzhs&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Backing Pinbadge1: <a href="https://www.canva.com/design/DAGgwEyxKD4/dRU6TkqcSi9Gp6pYjRYe8g/view?utm_content=DAGgwEyxKD4&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Square badge: <a href="https://www.canva.com/design/DAGgv4fa4dQ/PLiJOSws5sqko14ZsXUPhw/view?utm_content=DAGgv4fa4dQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Pin badge 58mm: <a href="https://www.canva.com/design/DAGgv-e-z9I/KNf7JA1DoI8yEjTQjHyPPQ/view?utm_content=DAGgv-e-z9I&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Wedding Money Envelope: <a href="https://www.canva.com/design/DAGgwLCHBqQ/8giQHAcwmct4FHGUJyp2Pg/view?utm_content=DAGgwLCHBqQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Wedding Money Envelope 2: <a href="https://www.canva.com/design/DAGgv-JRipw/a-t6yjvipxyk9nUlZcSTdQ/view?utm_content=DAGgv-JRipw&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>REF MAGNET Shape: <a href="https://www.canva.com/design/DAGgv5MwvSo/K2VeiME-84_kvFgpsGZSlQ/view?utm_content=DAGgv5MwvSo&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Memo pad: <a href="https://www.canva.com/design/DAGgwFddv-Y/ldIDO9c1dOHC2m18ml6pQg/view?utm_content=DAGgwFddv-Y&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Memo pad1: <a href="https://www.canva.com/design/DAGgwO6I1ww/vZpghHOUUcTwl7wZANi9Kg/view?utm_content=DAGgwO6I1ww&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Notepad2: <a href="https://www.canva.com/design/DAGgwEFz7Ug/c7yEK-CcFI_pG6gs5lMtPQ/view?utm_content=DAGgwEFz7Ug&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Notepad set: <a href="https://www.canva.com/design/DAGgwA_-0gw/pR9mMMHmEVhgDY5Hma44Kw/view?utm_content=DAGgwA_-0gw&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Notepad3: <a href="https://www.canva.com/design/DAGgwOppQ98/lrw5oPT1d86GXtN2Nf29Qw/view?utm_content=DAGgwOppQ98&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Notebook covers: <a href="https://www.canva.com/design/DAGgwGn-Blk/o3NsyfO94kCFpbqxvqiOSA/view?utm_content=DAGgwGn-Blk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Notebook covers (Heart): <a href="https://www.canva.com/design/DAGgwEHNdd8/-qG2-pfyvHnK2hEk301r2g/view?utm_content=DAGgwEHNdd8&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Pencil wrap: <a href="https://www.canva.com/design/DAGgwLbJ-uQ/7LSgD4hRvJCF6t0VblEMbQ/view?utm_content=DAGgwLbJ-uQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Pencilwrap1: <a href="https://www.canva.com/design/DAGgwGSfCHg/EQu258SckFwCp_ppI4DfhQ/view?utm_content=DAGgwGSfCHg&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Cute Pensleeve: <a href="https://www.canva.com/design/DAGgwCGGhbs/kq_w9m_ovKQJY9eBs2hlXA/view?utm_content=DAGgwCGGhbs&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Mothers day pensleeve: <a href="https://www.canva.com/design/DAGk_zHebBU/U8BQf9Ipr1Bv4COPq7RN3A/view?utm_content=DAGk_zHebBU&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Claw Clip: <a href="https://www.canva.com/design/DAGgwBOzBsE/33UZtZW4-L4GEEFXvfaySw/view?utm_content=DAGgwBOzBsE&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Bookmark profession: <a href="https://www.canva.com/design/DAGgwENU0OM/GxgYRalOyDLSwStJwLNdlw/view?utm_content=DAGgwENU0OM&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Bookmarks1: <a href="https://www.canva.com/design/DAGgwHaueA4/fF3__buv1Upb-izCNz7ehQ/view?utm_content=DAGgwHaueA4&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Cute Stickers: <a href="https://www.canva.com/design/DAGgwDvtB9w/-IvvFsgo-y1k9rY1XRX8YQ/view?utm_content=DAGgwDvtB9w&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Thankyou Stickers: <a href="https://www.canva.com/design/DAGgwG3Pg1c/TlVsV8G4YwGRth5toeRJqQ/view?utm_content=DAGgwG3Pg1c&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Graduation Lootbag: <a href="https://www.canva.com/design/DAGgwCpDAMo/LNzLJQZGZh1NNwmUIUwLxA/view?utm_content=DAGgwCpDAMo&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Graduation Toppers: <a href="https://www.canva.com/design/DAGgwEfc0JQ/osswDnjqn5CSYmV0QW7t3g/view?utm_content=DAGgwEfc0JQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Graduation Frame: <a href="https://www.canva.com/design/DAGgwFDGDbk/A2_D-8K3N5eoqJanA4g0vw/view?utm_content=DAGgwFDGDbk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Pensleeve: <a href="https://www.canva.com/design/DAGgwLnegFo/K1osSm9kGZm-FaBh-KDXOA/view?utm_content=DAGgwLnegFo&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Digital white Board: <a href="https://www.canva.com/design/DAGgwNzNzwk/tK5JcWgI7FjAt3a2uZBMKQ/view?utm_content=DAGgwNzNzwk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Whiteboard1: <a href="https://www.canva.com/design/DAGgwGZwXSw/j365IkfErceVL9sfyPuQ3w/view?utm_content=DAGgwGZwXSw&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Graduation tag: <a href="https://www.canva.com/design/DAGk_7AovFI/2SL4h_kyK4JGMdXNSwlHQQ/view?utm_content=DAGk_7AovFI&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Candy dome holder: <a href="https://www.canva.com/design/DAGk_31jqgM/fjA53kWjEUAPaZRR3M-zCQ/view?utm_content=DAGk_31jqgM&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview">Canva Link</a></p><p>Play money: <a href="https://drive.google.com/file/d/1rlBkVrVpU2qN02l4Xx0PYCX1ef84eEC2/view">Drive Link</a></p>'}
+  ];
+  save('pm_templates',templates);
 }
 
-function insertLink() {
-  const url = prompt('Enter URL:');
-  if (url) {
-    document.getElementById('m-body').focus();
-    document.execCommand('createLink', false, url);
-  }
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='history')renderHistory();
+  if(name==='manage')renderManageList();
+  if(name==='send')renderTemplateGrid();
 }
 
+function fmt(cmd){document.getElementById('m-body').focus();document.execCommand(cmd,false,null);}
+function insertLink(){const u=prompt('Enter URL:');if(u){document.getElementById('m-body').focus();document.execCommand('createLink',false,u);}}
 
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'history') renderHistory();
-  if (name === 'manage')  renderManageList();
-  if (name === 'send')    renderTemplateGrid();
+function renderTemplateGrid(){
+  const grid=document.getElementById('template-grid');
+  const noT=document.getElementById('no-templates');
+  if(!templates.length){grid.innerHTML='';noT.style.display='block';return;}
+  noT.style.display='none';
+  grid.innerHTML=templates.map(t=>`
+    <div class="template-option ${selectedTemplateId===t.id?'selected':''}" onclick="selectTemplate('${t.id}')">
+      <span class="t-icon">${t.icon||'📦'}</span>
+      <div class="t-info"><div class="t-name">${esc(t.name)}</div><div class="t-preview">${esc(t.subject)}</div></div>
+      <div class="t-check">${selectedTemplateId===t.id?'✓':''}</div>
+    </div>`).join('');
 }
 
-// ── TEMPLATE GRID (send page) ──────────────────────────
-function renderTemplateGrid() {
-  const grid = document.getElementById('template-grid');
-  const noT  = document.getElementById('no-templates');
-  if (!templates.length) {
-    grid.innerHTML = '';
-    noT.style.display = 'block';
-    return;
-  }
-  noT.style.display = 'none';
-  grid.innerHTML = templates.map(t => `
-    <div class="template-option ${selectedTemplateId === t.id ? 'selected' : ''}" onclick="selectTemplate('${t.id}')">
-      <span class="t-icon">${t.icon || '📦'}</span>
-      <div class="t-info">
-        <div class="t-name">${esc(t.name)}</div>
-        <div class="t-preview">${esc(t.subject)}</div>
-      </div>
-      <div class="t-check">${selectedTemplateId === t.id ? '✓' : ''}</div>
-    </div>
-  `).join('');
-}
+function selectTemplate(id){selectedTemplateId=id;renderTemplateGrid();}
 
-function selectTemplate(id) {
-  selectedTemplateId = id;
-  renderTemplateGrid();
-}
-
-// ── SEND EMAIL ─────────────────────────────────────────
-async function sendEmail() {
-  const email = document.getElementById('s-email').value.trim();
-  if (!email) { showToast('Enter a customer email', 'err'); return; }
-  if (!selectedTemplateId) { showToast('Select a template first', 'err'); return; }
-  if (!cfg.service || !cfg.templateId || !cfg.pubkey) {
-    showToast('⚙️ Setup EmailJS in Settings first', 'err'); return;
-  }
-
-  const tmpl = templates.find(t => t.id === selectedTemplateId);
-  if (!tmpl) { showToast('Template not found', 'err'); return; }
-
-  // Convert HTML body to plain text for EmailJS
-  const tmp = document.createElement('div');
-  tmp.innerHTML = tmpl.body || '';
-  const plainBody = tmp.innerText || tmp.textContent || '';
-
-  const btn = document.getElementById('send-btn');
-  btn.innerHTML = '<span class="spinner"></span> Sending...';
-  btn.disabled = true;
-
-  try {
-    await emailjs.send(cfg.service, cfg.templateId, {
-      to_email: email,
-      from_name: cfg.sender || 'My Digital Shop',
-      reply_to: cfg.reply || '',
-      subject: tmpl.subject,
-      message: plainBody,
+async function sendEmail(){
+  const email=document.getElementById('s-email').value.trim();
+  if(!email){showToast('Enter a customer email','err');return;}
+  if(!selectedTemplateId){showToast('Select a template first','err');return;}
+  const tmpl=templates.find(t=>t.id===selectedTemplateId);
+  if(!tmpl){showToast('Template not found','err');return;}
+  const btn=document.getElementById('send-btn');
+  btn.innerHTML='<span class="spinner"></span> Sending...';
+  btn.disabled=true;
+  try{
+    const res=await fetch(WORKER_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({to:email,subject:tmpl.subject,body:tmpl.body,secret:WORKER_SECRET})
     });
-    addHistory(email, tmpl.name, 'sent');
-    showToast('✅ Sent to ' + email, 'ok');
-    document.getElementById('s-email').value = '';
-    selectedTemplateId = null;
-    renderTemplateGrid();
-  } catch(e) {
-    console.error(e);
-    addHistory(email, tmpl.name, 'failed');
-    showToast('❌ Failed: ' + (e.text || 'Check Settings'), 'err');
+    const data=await res.json();
+    if(data.success){
+      addHistory(email,tmpl.name,'sent');
+      showToast('Sent to '+email,'ok');
+      document.getElementById('s-email').value='';
+      selectedTemplateId=null;
+      renderTemplateGrid();
+    }else{
+      addHistory(email,tmpl.name,'failed');
+      showToast('Failed: '+(data.error||'Unknown error'),'err');
+    }
+  }catch(e){
+    addHistory(email,tmpl.name,'failed');
+    showToast('Network error. Check connection.','err');
   }
-
-  btn.innerHTML = '<span>📨</span> Send Email';
-  btn.disabled = false;
+  btn.innerHTML='<span>📨</span> Send Email';
+  btn.disabled=false;
 }
 
-// ── MANAGE LIST ────────────────────────────────────────
-function renderManageList() {
-  const el = document.getElementById('manage-list');
-  if (!templates.length) {
-    el.innerHTML = `<div class="empty"><div class="e-icon">📭</div><p>No templates yet.<br>Tap <strong>New Template</strong> to create one.</p></div>`;
-    return;
-  }
-  el.innerHTML = templates.map(t => `
+function renderManageList(){
+  const el=document.getElementById('manage-list');
+  if(!templates.length){el.innerHTML='<div class="empty"><div class="e-icon">📭</div><p>No templates yet.</p></div>';return;}
+  el.innerHTML=templates.map(t=>`
     <div class="tmpl-item">
-      <span class="ti-icon">${t.icon || '📦'}</span>
-      <div class="ti-info">
-        <div class="ti-name">${esc(t.name)}</div>
-        <div class="ti-sub">${esc(t.subject)}</div>
-      </div>
+      <span class="ti-icon">${t.icon||'📦'}</span>
+      <div class="ti-info"><div class="ti-name">${esc(t.name)}</div><div class="ti-sub">${esc(t.subject)}</div></div>
       <div class="ti-actions">
         <button class="icon-btn edit" onclick="openModal('${t.id}')">✏️</button>
         <button class="icon-btn del" onclick="deleteTemplate('${t.id}')">🗑️</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-// ── CRUD MODAL ─────────────────────────────────────────
-function openModal(id = null) {
-  editingId = id;
-  document.getElementById('modal-title-text').textContent = id ? 'Edit Template' : 'New Template';
-  if (id) {
-    const t = templates.find(t => t.id === id);
-    document.getElementById('m-name').value    = t.name;
-    document.getElementById('m-icon').value    = t.icon || '📦';
-    document.getElementById('m-subject').value = t.subject;
-    document.getElementById('m-body').innerHTML = t.body || '';
-  } else {
-    document.getElementById('m-name').value    = '';
-    document.getElementById('m-icon').value    = '📦';
-    document.getElementById('m-subject').value = '';
-    document.getElementById('m-body').innerHTML = '';
+function openModal(id=null){
+  editingId=id;
+  document.getElementById('modal-title-text').textContent=id?'Edit Template':'New Template';
+  if(id){
+    const t=templates.find(t=>t.id===id);
+    document.getElementById('m-name').value=t.name;
+    document.getElementById('m-icon').value=t.icon||'📦';
+    document.getElementById('m-subject').value=t.subject;
+    document.getElementById('m-body').innerHTML=t.body||'';
+  }else{
+    document.getElementById('m-name').value='';
+    document.getElementById('m-icon').value='📦';
+    document.getElementById('m-subject').value='';
+    document.getElementById('m-body').innerHTML='';
   }
   document.getElementById('modal-overlay').classList.add('open');
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
-}
-function closeModalDirect() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  editingId = null;
-}
+function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalDirect();}
+function closeModalDirect(){document.getElementById('modal-overlay').classList.remove('open');editingId=null;}
 
-function saveTemplate() {
-  const name    = document.getElementById('m-name').value.trim();
-  const icon    = document.getElementById('m-icon').value.trim() || '📦';
-  const subject = document.getElementById('m-subject').value.trim();
-  const body    = document.getElementById('m-body').innerHTML.trim();
-
-  if (!name || !subject || !body) { showToast('Fill in all fields', 'err'); return; }
-
-  if (editingId) {
-    const i = templates.findIndex(t => t.id === editingId);
-    templates[i] = { ...templates[i], name, icon, subject, body };
-    showToast('✅ Template updated', 'ok');
-  } else {
-    templates.push({ id: 'tmpl_' + Date.now(), name, icon, subject, body });
-    showToast('✅ Template created', 'ok');
+function saveTemplate(){
+  const name=document.getElementById('m-name').value.trim();
+  const icon=document.getElementById('m-icon').value.trim()||'📦';
+  const subject=document.getElementById('m-subject').value.trim();
+  const body=document.getElementById('m-body').innerHTML.trim();
+  if(!name||!subject||!body){showToast('Fill in all fields','err');return;}
+  if(editingId){
+    const i=templates.findIndex(t=>t.id===editingId);
+    templates[i]={...templates[i],name,icon,subject,body};
+    showToast('Template updated','ok');
+  }else{
+    templates.push({id:'tmpl_'+Date.now(),name,icon,subject,body});
+    showToast('Template created','ok');
   }
-
-  save('pm_templates', templates);
+  save('pm_templates',templates);
   closeModalDirect();
   renderManageList();
   renderTemplateGrid();
 }
 
-function deleteTemplate(id) {
-  if (!confirm('Delete this template?')) return;
-  templates = templates.filter(t => t.id !== id);
-  if (selectedTemplateId === id) selectedTemplateId = null;
-  save('pm_templates', templates);
-  renderManageList();
-  renderTemplateGrid();
-  showToast('🗑️ Deleted', '');
+function deleteTemplate(id){
+  if(!confirm('Delete this template?'))return;
+  templates=templates.filter(t=>t.id!==id);
+  if(selectedTemplateId===id)selectedTemplateId=null;
+  save('pm_templates',templates);
+  renderManageList();renderTemplateGrid();
+  showToast('Deleted','');
 }
 
-// ── HISTORY ────────────────────────────────────────────
-function addHistory(email, templateName, status) {
-  history.unshift({ email, templateName, status, date: new Date().toISOString() });
-  save('pm_history', history);
+function addHistory(email,templateName,status){
+  history.unshift({email,templateName,status,date:new Date().toISOString()});
+  save('pm_history',history);
 }
 
-function renderHistory() {
-  const el = document.getElementById('hist-list');
-  const ct = document.getElementById('hist-count');
-  ct.textContent = history.length + ' email' + (history.length !== 1 ? 's' : '') + ' sent';
-  if (!history.length) {
-    el.innerHTML = `<div class="empty"><div class="e-icon">📭</div><p>No history yet.</p></div>`;
-    return;
-  }
-  el.innerHTML = history.map(h => {
-    const d = new Date(h.date);
-    const ds = d.toLocaleDateString('en-PH',{month:'short',day:'numeric'}) + ' ' +
-               d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
-    return `<div class="hist-item">
-      <div class="hist-email">${esc(h.email)}</div>
-      <div class="hist-meta">
-        <span class="badge ${h.status}">${h.status === 'sent' ? '✓ Sent' : '✗ Failed'}</span>
-        <span class="hist-template">${esc(h.templateName)}</span>
-        <span class="hist-date">${ds}</span>
-      </div>
-    </div>`;
+function renderHistory(){
+  const el=document.getElementById('hist-list');
+  const ct=document.getElementById('hist-count');
+  ct.textContent=history.length+' email'+(history.length!==1?'s':'')+' sent';
+  if(!history.length){el.innerHTML='<div class="empty"><div class="e-icon">📭</div><p>No history yet.</p></div>';return;}
+  el.innerHTML=history.map(h=>{
+    const d=new Date(h.date);
+    const ds=d.toLocaleDateString('en-PH',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+    return`<div class="hist-item"><div class="hist-email">${esc(h.email)}</div><div class="hist-meta"><span class="badge ${h.status}">${h.status==='sent'?'Sent':'Failed'}</span><span class="hist-template">${esc(h.templateName)}</span><span class="hist-date">${ds}</span></div></div>`;
   }).join('');
 }
 
-function clearHistory() {
-  if (!history.length) return;
-  if (!confirm('Clear all history?')) return;
-  history = [];
-  save('pm_history', history);
-  renderHistory();
+function clearHistory(){
+  if(!history.length)return;
+  if(!confirm('Clear all history?'))return;
+  history=[];save('pm_history',history);renderHistory();
 }
 
-// ── SETTINGS ───────────────────────────────────────────
-function loadCfgUI() {
-  document.getElementById('cfg-service').value  = cfg.service    || '';
-  document.getElementById('cfg-template').value = cfg.templateId || '';
-  document.getElementById('cfg-pubkey').value   = cfg.pubkey     || '';
-  document.getElementById('cfg-sender').value   = cfg.sender     || '';
-  document.getElementById('cfg-reply').value    = cfg.reply      || '';
-}
-
-function saveSettings() {
-  cfg = {
-    service:    document.getElementById('cfg-service').value.trim(),
-    templateId: document.getElementById('cfg-template').value.trim(),
-    pubkey:     document.getElementById('cfg-pubkey').value.trim(),
-    sender:     document.getElementById('cfg-sender').value.trim(),
-    reply:      document.getElementById('cfg-reply').value.trim(),
-  };
-  save('pm_cfg', cfg);
-  if (cfg.pubkey) emailjs.init(cfg.pubkey);
-  showToast('✅ Settings saved!', 'ok');
-}
-
-// ── HELPERS ────────────────────────────────────────────
-function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + (type || '');
-  setTimeout(() => t.className = 'toast', 3000);
+function save(key,val){localStorage.setItem(key,JSON.stringify(val));}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+(type||'');
+  setTimeout(()=>t.className='toast',3200);
 }
 
 init();
