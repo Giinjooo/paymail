@@ -180,7 +180,25 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
 .setup-banner{background:rgba(251,191,36,0.08);border:1.5px solid rgba(251,191,36,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:0.8rem;color:var(--yellow);line-height:1.7;}
 .setup-banner strong{display:block;margin-bottom:4px;}
 
-/* SPINNER */
+/* RICH TEXT EDITOR */
+.rte-toolbar{display:flex;flex-wrap:wrap;gap:5px;background:var(--surface2);border:1.5px solid var(--border);border-bottom:none;border-radius:11px 11px 0 0;padding:8px 10px;}
+.rte-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.78rem;padding:5px 10px;cursor:pointer;font-family:var(--font);transition:all 0.15s;}
+.rte-btn:active,.rte-btn:focus{background:var(--accent);color:#fff;outline:none;}
+.rte-sep{width:1px;background:var(--border);margin:0 2px;}
+.rte-editor{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-top:none;border-radius:0 0 11px 11px;
+  padding:12px 14px;font-family:var(--font);font-size:0.9rem;color:var(--text);outline:none;
+  min-height:200px;max-height:60vh;overflow-y:auto;
+  line-height:1.7;word-break:break-word;
+  transition:border-color 0.2s;
+}
+.rte-editor:focus{border-color:var(--accent);}
+.rte-editor:empty:before{content:attr(placeholder);color:var(--muted);pointer-events:none;}
+.rte-editor a{color:var(--accent2);word-break:break-all;}
+.rte-editor ul,.rte-editor ol{padding-left:20px;}
+
+
 .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -226,7 +244,22 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
     </div>
     <div class="field">
       <label>Email Body (include your access links here)</label>
-      <textarea id="m-body" placeholder="Hi there!&#10;&#10;Thank you for your payment. Here is your access link:&#10;&#10;🔗 https://your-link-here.com&#10;&#10;— Your Shop Name"></textarea>
+      <div class="rte-toolbar">
+        <button type="button" class="rte-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+        <button type="button" class="rte-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+        <button type="button" class="rte-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+        <span class="rte-sep"></span>
+        <button type="button" class="rte-btn" onclick="fmt('insertUnorderedList')" title="Bullet List">• List</button>
+        <button type="button" class="rte-btn" onclick="fmt('insertOrderedList')" title="Numbered List">1. List</button>
+        <span class="rte-sep"></span>
+        <button type="button" class="rte-btn" onclick="insertLink()" title="Insert Link">🔗 Link</button>
+        <button type="button" class="rte-btn" onclick="fmt('removeFormat')" title="Clear Format">✕ Clear</button>
+      </div>
+      <div id="m-body"
+        class="rte-editor"
+        contenteditable="true"
+        placeholder="Hi there!&#10;&#10;Thank you for your payment. Here is your access link:&#10;&#10;🔗 https://your-link-here.com&#10;&#10;— Your Shop Name"
+      ></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModalDirect()">Cancel</button>
@@ -358,7 +391,20 @@ function init() {
   if (cfg.pubkey) emailjs.init(cfg.pubkey);
 }
 
-// ── NAVIGATION ─────────────────────────────────────────
+function fmt(cmd) {
+  document.getElementById('m-body').focus();
+  document.execCommand(cmd, false, null);
+}
+
+function insertLink() {
+  const url = prompt('Enter URL:');
+  if (url) {
+    document.getElementById('m-body').focus();
+    document.execCommand('createLink', false, url);
+  }
+}
+
+
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -408,6 +454,11 @@ async function sendEmail() {
   const tmpl = templates.find(t => t.id === selectedTemplateId);
   if (!tmpl) { showToast('Template not found', 'err'); return; }
 
+  // Convert HTML body to plain text for EmailJS
+  const tmp = document.createElement('div');
+  tmp.innerHTML = tmpl.body || '';
+  const plainBody = tmp.innerText || tmp.textContent || '';
+
   const btn = document.getElementById('send-btn');
   btn.innerHTML = '<span class="spinner"></span> Sending...';
   btn.disabled = true;
@@ -418,7 +469,7 @@ async function sendEmail() {
       from_name: cfg.sender || 'My Digital Shop',
       reply_to: cfg.reply || '',
       subject: tmpl.subject,
-      message: tmpl.body,
+      message: plainBody,
     });
     addHistory(email, tmpl.name, 'sent');
     showToast('✅ Sent to ' + email, 'ok');
@@ -466,12 +517,12 @@ function openModal(id = null) {
     document.getElementById('m-name').value    = t.name;
     document.getElementById('m-icon').value    = t.icon || '📦';
     document.getElementById('m-subject').value = t.subject;
-    document.getElementById('m-body').value    = t.body;
+    document.getElementById('m-body').innerHTML = t.body || '';
   } else {
     document.getElementById('m-name').value    = '';
     document.getElementById('m-icon').value    = '📦';
     document.getElementById('m-subject').value = '';
-    document.getElementById('m-body').value    = '';
+    document.getElementById('m-body').innerHTML = '';
   }
   document.getElementById('modal-overlay').classList.add('open');
 }
@@ -488,7 +539,7 @@ function saveTemplate() {
   const name    = document.getElementById('m-name').value.trim();
   const icon    = document.getElementById('m-icon').value.trim() || '📦';
   const subject = document.getElementById('m-subject').value.trim();
-  const body    = document.getElementById('m-body').value.trim();
+  const body    = document.getElementById('m-body').innerHTML.trim();
 
   if (!name || !subject || !body) { showToast('Fill in all fields', 'err'); return; }
 
