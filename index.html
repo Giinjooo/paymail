@@ -182,7 +182,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
 </div>
 
 <script>
-const WORKER_URL='https://script.google.com/macros/s/AKfycbwuQWCZOlIBq_1yzEH801-JksLuMrNzKQmXmJL4Q0EVXLwRG02Vmx8oTR3eGapZ7Fdl/exec';
+const WORKER_URL='https://script.google.com/macros/s/AKfycbxZ_GIjapLXZtlTlmE7_5Oeal_fHrmktV6xyW-XAlxc8job7wMI7tEWi07u7PLDAaUG/exec';
 const WORKER_SECRET='Aceease123@#';
 let templates=[],history=[],editingId=null,selectedTemplateId=null;
 
@@ -248,7 +248,7 @@ async function sendEmail(){
 
     const res=await fetch(WORKER_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({
         to:email,
         subject:tmpl.subject,
