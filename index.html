@@ -109,7 +109,11 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
     <div class="logo-dot"></div>
     <div><div>PayMail</div><div class="logo-sub">D' Bookshelf</div></div>
   </div>
-  <span style="font-size:0.68rem;color:var(--muted);font-family:var(--mono);">v3.0</span>
+  <div id="quota-badge" style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;">
+    <span style="font-size:0.75rem;">📧</span>
+    <span id="quota-text" style="font-size:0.72rem;font-family:var(--mono);color:var(--text);font-weight:600;"></span>
+    <span style="font-size:0.65rem;color:var(--muted);">/ 100 today</span>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -186,10 +190,34 @@ const GAS_URL='https://script.google.com/macros/s/AKfycbzkUAdtZLvHbGeIEeDECev09U
 const WORKER_SECRET='Aceease123@#';
 let templates=[],history=[],editingId=null,selectedTemplateId=null;
 
+function getQuota(){
+  const today=new Date().toDateString();
+  const stored=JSON.parse(localStorage.getItem('pm_quota')||'{}');
+  if(stored.date!==today)return{date:today,count:0};
+  return stored;
+}
+function incrementQuota(){
+  const q=getQuota();q.count+=1;
+  localStorage.setItem('pm_quota',JSON.stringify(q));
+  updateQuotaUI();
+}
+function updateQuotaUI(){
+  const q=getQuota();
+  const remaining=100-q.count;
+  const el=document.getElementById('quota-text');
+  if(!el)return;
+  el.textContent=remaining;
+  const badge=document.getElementById('quota-badge');
+  if(remaining<=10){badge.style.borderColor='rgba(248,113,113,0.5)';el.style.color='var(--red)';}
+  else if(remaining<=30){badge.style.borderColor='rgba(251,191,36,0.5)';el.style.color='#fbbf24';}
+  else{badge.style.borderColor='rgba(74,222,128,0.3)';el.style.color='var(--green)';}
+}
+
 function init(){
   templates=JSON.parse(localStorage.getItem('pm_templates')||'[]');
   history=JSON.parse(localStorage.getItem('pm_history')||'[]');
   renderTemplateGrid();renderManageList();renderHistory();
+  updateQuotaUI();
 }
 
 function showPage(name){
@@ -274,6 +302,7 @@ async function sendEmail(){
     await new Promise(r=>setTimeout(r,3000));
 
     addHistory(email,tmpl.name,'sent');
+    incrementQuota();
     showToast('✅ Sent to '+email,'ok');
     selectedTemplateId=null;
     renderTemplateGrid();
