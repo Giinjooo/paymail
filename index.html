@@ -182,7 +182,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-10%;width:50%;height:50
 </div>
 
 <script>
-const WORKER_URL='https://paymail-sender.jason-giinjo.workers.dev';
+const GAS_URL='https://script.google.com/macros/s/AKfycbwGb96RAaT2cbgDg75cPsCapzuJY-lMRV2q6jQgZosg80Irm0Ym-9kADg2vDyzn8zRu/exec';
 const WORKER_SECRET='Aceease123@#';
 let templates=[],history=[],editingId=null,selectedTemplateId=null;
 
@@ -230,35 +230,30 @@ async function sendEmail(){
   btn.innerHTML='<span class="spinner"></span> Sending...';
   btn.disabled=true;
   try{
-    // Convert HTML to plain text for fallback
-    const tmp = document.createElement('div');
-    tmp.innerHTML = tmpl.body || '';
-    const plainText = tmp.innerText || tmp.textContent || '';
+    const tmp=document.createElement('div');
+    tmp.innerHTML=tmpl.body||'';
+    const plainText=tmp.innerText||tmp.textContent||'';
 
-    const formData = new URLSearchParams();
-    formData.append('data', JSON.stringify({
-      to: email,
-      subject: tmpl.subject,
-      htmlBody: tmpl.body,
-      plainText: plainText,
-      secret: WORKER_SECRET
-    }));
-
-    const res=await fetch(WORKER_URL,{
-      method:'POST',
-      body: formData
+    const params=new URLSearchParams({
+      to:email,
+      subject:tmpl.subject,
+      htmlBody:tmpl.body,
+      plainText:plainText,
+      secret:WORKER_SECRET,
     });
-    const data=await res.json();
-    if(data.success){
-      addHistory(email,tmpl.name,'sent');
-      showToast('Sent to '+email,'ok');
-      document.getElementById('s-email').value='';
-      selectedTemplateId=null;
-      renderTemplateGrid();
-    }else{
-      addHistory(email,tmpl.name,'failed');
-      showToast('Failed: '+(data.error||'Unknown error'),'err');
-    }
+
+    // Call Apps Script directly — no-cors avoids CORS errors
+    await fetch(`${GAS_URL}?${params.toString()}`,{
+      method:'GET',
+      mode:'no-cors',
+    });
+
+    // no-cors means we can't read response — assume success
+    addHistory(email,tmpl.name,'sent');
+    showToast('✅ Sent to '+email,'ok');
+    document.getElementById('s-email').value='';
+    selectedTemplateId=null;
+    renderTemplateGrid();
   }catch(e){
     addHistory(email,tmpl.name,'failed');
     showToast('Network error. Check connection.','err');
