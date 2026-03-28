@@ -234,29 +234,52 @@ async function sendEmail(){
     tmp.innerHTML=tmpl.body||'';
     const plainText=tmp.innerText||tmp.textContent||'';
 
-    const params=new URLSearchParams({
+    // Use a hidden form POST — bypasses CORS and URL length limits
+    const form=document.createElement('form');
+    form.method='POST';
+    form.action=GAS_URL;
+    form.target='gas_frame';
+    form.style.display='none';
+
+    const fields={
       to:email,
       subject:tmpl.subject,
       htmlBody:tmpl.body,
       plainText:plainText,
       secret:WORKER_SECRET,
-    });
+    };
 
-    // Call Apps Script directly — no-cors avoids CORS errors
-    await fetch(`${GAS_URL}?${params.toString()}`,{
-      method:'GET',
-      mode:'no-cors',
-    });
+    for(const [key,val] of Object.entries(fields)){
+      const input=document.createElement('input');
+      input.type='hidden';
+      input.name=key;
+      input.value=val;
+      form.appendChild(input);
+    }
 
-    // no-cors means we can't read response — assume success
+    // Hidden iframe to capture response without page reload
+    let iframe=document.getElementById('gas_frame');
+    if(!iframe){
+      iframe=document.createElement('iframe');
+      iframe.name='gas_frame';
+      iframe.style.display='none';
+      document.body.appendChild(iframe);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+
+    // Wait a moment then assume success
+    await new Promise(r=>setTimeout(r,3000));
+
     addHistory(email,tmpl.name,'sent');
     showToast('✅ Sent to '+email,'ok');
-    document.getElementById('s-email').value='';
     selectedTemplateId=null;
     renderTemplateGrid();
   }catch(e){
     addHistory(email,tmpl.name,'failed');
-    showToast('Network error. Check connection.','err');
+    showToast('Error: '+e.message,'err');
   }
   btn.innerHTML='<span>📨</span> Send Email';
   btn.disabled=false;
